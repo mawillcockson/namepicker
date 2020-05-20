@@ -127,3 +127,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# VSCode
+saved.code-workspace
+
+# (Neo)Vim
+Session.vim
