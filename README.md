@@ -9,3 +9,4 @@ Intended features:
 - GUI
 - Random name generator
   - With ML
+- Web GUI
