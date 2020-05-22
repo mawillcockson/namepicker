@@ -3,7 +3,7 @@ import sys
 import typing
 from collections import Counter
 from csv import DictReader
-from itertools import islice
+from itertools import accumulate, islice
 from pathlib import Path
 from random import choices, randint
 from re import compile as re_compile
@@ -92,7 +92,42 @@ def printlist(names: List[str]) -> None:
 
 
 def find_unique_prefixes(options: List[str]) -> Dict[str, str]:
-    pass
+    if len(set(options)) != len(options):
+        duplicates = ", ".join(filter(lambda s: options.count(s) > 1, options))
+        raise ValueError(f"Can't have duplicate items!\n{duplicates}")
+
+    # Create an unlinked copy for this destructive algorithm
+    options_duplicate = list(options)
+    unique_prefixes: Dict[str, str] = dict()
+    options_duplicate.sort()
+    while options_duplicate:
+        for i, option in enumerate(options_duplicate):
+            options_copy = list(options_duplicate)
+            del options_copy[i]
+            for prefix in accumulate(option):
+                if not list(filter(lambda s: s.startswith(prefix), options_copy)):
+                    if option in unique_prefixes:
+                        raise ValueError(
+                            f"""Somehow found duplicate prefix:
+options:
+{options}
+options_duplicate:
+{options_duplicate}
+option: {option}
+prefix: {prefix}
+unique_prefixes:
+{unique_prefixes}"""
+                        )
+                    unique_prefixes[option] = prefix
+                    break
+
+        for option in unique_prefixes:
+            if option in options_duplicate:
+                index = options_duplicate.index(option)
+                del options_duplicate[index]
+
+    # Recreate dictionary to ensure order of options
+    return {option: unique_prefixes[option] for option in options}
 
 
 def input_options(
@@ -147,7 +182,7 @@ T = TypeVar("T")
 ValueParser = Union[float, int, str, Callable[[str], T]]
 
 
-def input_type(prompt: str = "", type: ValueParser = str) -> T:
+def input_type(prompt: str = "", type: ValueParser[T] = str) -> T:
     pass
 
 
@@ -157,6 +192,7 @@ Config = Dict[str, int]
 def valid_config(config: Config) -> bool:
     pass
 
+
 def ask_for_config() -> Config:
     min_length = input_type(f"How long is the shortest name? [3] >> ", int)
     max_length = input_type(f"How long is the longest name?  [8] >> ", int)
@@ -164,7 +200,6 @@ def ask_for_config() -> Config:
         "min_length": min_length,
         "max_length": max_length,
     }
-
 
 
 def create_config(path: SPath = default_config_file) -> Config:
