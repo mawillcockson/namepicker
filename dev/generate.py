@@ -1,17 +1,43 @@
+#!/usr/bin/env python
 import json
 import sys
 import typing
-from collections import Counter
+from collections import Counter, deque
 from csv import DictReader
 from itertools import accumulate, islice
 from pathlib import Path
 from random import choices, randint
 from re import compile as re_compile
 from string import ascii_lowercase
-from typing import Callable, Dict, Iterator, List, Optional, TypeVar, Union
+from typing import (
+    Any,
+    Callable,
+    Deque,
+    Dict,
+    Iterator,
+    List,
+    Optional,
+    TypedDict,
+    TypeVar,
+    Union,
+)
+
+assert sys.version_info >= (
+    3,
+    8,
+), f"Python 3.8 or higher required\ndetected version: {sys.version}"
+
 
 default_config_file = "./generate_config.json"
 SPath = Union[str, Path]
+
+
+class Config(TypedDict):
+    min_length: int
+    max_length: int
+    letter_weights: Dict[str, float]
+
+
 default_weights = {
     "s": 0.05800358317132825,
     "m": 0.03276713552844685,
@@ -42,6 +68,11 @@ default_weights = {
     " ": 1.7729694845357168e-06,
 }
 default_tries: int = 3
+default_config: Config = {
+    "max_length": 8,
+    "min_length": 3,
+    "letter_weights": default_weights,
+}
 
 
 def name_list() -> Iterator[str]:
@@ -70,21 +101,31 @@ def letter_weights() -> Dict[str, float]:
     }
 
 
-def rand_name(length: int) -> str:
-    weights = default_weights
+def rand_name(length: int, weights: Dict[str, float]) -> str:
     sample_of_letters = choices(
         list(weights.keys()), weights=list(weights.values()), k=length
     )
     return "".join(sample_of_letters).capitalize()
 
 
-def rand_names(min_length: int = 3, max_length: int = 8) -> Iterator[str]:
+def rand_names(
+    min_length: int = 3,
+    max_length: int = 8,
+    weights: Dict[str, float] = default_weights,
+) -> Iterator[str]:
     while True:
-        yield rand_name(randint(min_length, max_length))
+        yield rand_name(length=randint(min_length, max_length), weights=weights)
 
 
-def rand_list(count: int, min_length: int, max_length: int) -> List[str]:
-    return list(islice(rand_names(min_length=min_length, max_length=max_length), count))
+def rand_list(
+    count: int, min_length: int, max_length: int, weights: Dict[str, float]
+) -> List[str]:
+    return list(
+        islice(
+            rand_names(min_length=min_length, max_length=max_length, weights=weights),
+            count,
+        )
+    )
 
 
 def printlist(names: List[str]) -> None:
@@ -158,7 +199,7 @@ def input_options(
         elif len(matching_options) == 1:
             return matching_options[0]
         else:
-            print(f"'{option} too ambiguous for '{option_string}'")
+            print(f"'{option}' too ambiguous for '{option_string}'")
             return ""
 
     typed = ""
@@ -178,40 +219,113 @@ def input_options(
     return typed
 
 
-T = TypeVar("T")
-ValueParser = Union[float, int, str, Callable[[str], T]]
+def input_type(
+    prompt: str = "", convert: Callable[[str], Any] = str, default: Optional[Any] = None
+) -> Any:
+    resolved: Any = None
+    for i in range(default_tries):
+        typed = input(prompt)
+        if not typed and default is None:
+            raise ValueError("No value given; no default given")
+        elif not typed:
+            return default
+
+        try:
+            resolved = convert(typed)
+        except ValueError:
+            print(f"'{typed}' is not an '{convert.__name__}'")
+            continue
+        break
+    if resolved is None:
+        raise ValueError("No value given; no default given")
+
+    return resolved
 
 
-def input_type(prompt: str = "", type: ValueParser[T] = str) -> T:
-    pass
+def valid_config(config: Config) -> Config:
+    """Returns unmodified config if it's valid
+    if it's invalid, raises ValueError"""
+    extra_keys = set(config.keys()) - set(default_config.keys())
+    if extra_keys:
+        extra_keys_string = ", ".join(f"'{key}'" for key in extra_keys)
+        raise ValueError(f"These keys are not necessary: {extra_keys_string}")
+    for key in default_config:
+        if key not in config:
+            raise ValueError(f"Missing config key: '{key}'")
+        if not isinstance(config[key], type(default_config[key])):
+            raise ValueError(
+                f"Type of value for '{key}' does not match: {type(config[key])} =/= {type(default_config[key])}"
+            )
+        # NOTE: Does not recurse into dictionaries
+        # if isinstance(config[key], dict):
+
+    return config
 
 
-Config = Dict[str, int]
+def ask_for_config(defaults: Config = default_config) -> Config:
+    config: Config = dict()
+    print(
+        f"""For each value that needs to be configured, the name of the key will be shown wrapped in quotes,
+then the default value in brackets.
+For example:
+"example_key" ["example_value"] >>
+The response must look like the default value; in this case, it must be an 'str'
 
+"""
+    )
+    needed_keys: Deque[List[str]] = deque([key] for key in defaults.keys())
+    while needed_keys:
+        keys = needed_keys.pop()
+        if not keys:
+            raise ValueError(
+                f"""Somehow got an empty list for a key:
+needed_keys:
+{needed_keys}
+defaults:
+{defaults}
+"""
+            )
+        sub_dict = defaults
+        for key in keys[:-1]:
+            sub_dict = sub_dict[key]
+        key = keys[-1]
+        default_value = sub_dict[key]
 
-def valid_config(config: Config) -> bool:
-    pass
+        if isinstance(default_value, dict):
+            for key in default_value:
+                new_keys = list(keys)
+                new_keys.append(key)
+                needed_keys.append(new_keys)
+            continue
 
+        keys_string = ".".join(keys)
+        typed = input_type(
+            f'"{keys_string}" [{default_value}] >> ',
+            type(default_value),
+            default=default_value,
+        )
+        sub_dict = config
+        for key in keys[:-1]:
+            if key not in sub_dict:
+                sub_dict[key] = dict()
+            sub_dict = sub_dict[key]
+        sub_dict[keys[-1]] = typed
 
-def ask_for_config() -> Config:
-    min_length = input_type(f"How long is the shortest name? [3] >> ", int)
-    max_length = input_type(f"How long is the longest name?  [8] >> ", int)
-    return {
-        "min_length": min_length,
-        "max_length": max_length,
-    }
+    return config
 
 
 def create_config(path: SPath = default_config_file) -> Config:
+    we_want_to_configure = (
+        input_options("Do you want to change the configuration?", ["yes", "no"])
+        == "yes"
+    )
     config_file = Path(path).resolve()
-    if config_file.exists():
-        overwrite = input_options(
-            f"'{config_file.resolve()}' already exists. Overwrite?", ["yes", "no"]
-        ).lower()
-        if overwrite == "no":
-            return read_config(config_file)
-
-    config = ask_for_config()
+    if not we_want_to_configure and config_file.exists():
+        return valid_config(read_config(config_file))
+    elif not we_want_to_configure:
+        return valid_config(default_config)
+    else:
+        config = valid_config(ask_for_config(defaults=default_config))
 
     config_string = json.dumps(config, sort_keys=True, indent=4)
     print(config_string)
@@ -222,7 +336,7 @@ def create_config(path: SPath = default_config_file) -> Config:
     """.lstrip(),
         ["yes", "no"],
     )
-    if write_config:
+    if write_config == "yes":
         for parent in config_file.parents:
             if parent.exists() and not parent.is_dir():
                 raise FileExistsError(
@@ -252,18 +366,14 @@ def read_config(path: SPath = default_config_file) -> Config:
 
     config = json.loads(contents)
 
-    if not valid_config(config):
-        raise ValueError(
-            f"Problem with configuration:\nInterpreted\n{config}\n\nFile Contents\n{contents}"
-        )
-
-    return config
+    return valid_config(config)
 
 
 def main() -> None:
-    config = read_config(default_config_file)
+    config = create_config(default_config_file)
 
     num = 1
+    print("Type anything except a number to quit")
     while True:
         typed = input(f"Number of names? [{num}] >> ")
         if typed.isdecimal():
@@ -279,6 +389,7 @@ def main() -> None:
                 count=num,
                 min_length=config["min_length"],
                 max_length=config["max_length"],
+                weights=config["letter_weights"],
             )
         )
 
