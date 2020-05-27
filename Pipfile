@@ -1,0 +1,5 @@
+[packages]
+pony = "*"
+
+[dev-packages]
+prompt-toolkit = "*"
