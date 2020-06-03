@@ -10,6 +10,11 @@
 *.json
 !example.json
 
+# Editors
+.vscode/
+settings.json
+Session.vim
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

@@ -60,6 +60,9 @@ def main() -> None:
     space()
 
     with orm.db_session():
+        # Why does show() not return a string? Why does it print?
+        # Why don't the objects all have __repr__ methods that have
+        # similar information as show()
         Car.select().show()
 
     space()
@@ -130,11 +133,30 @@ def main() -> None:
         mary = Person.select(lambda x: x.name == "Mary")[:][0]
 
         try:
-            mary.age += 22.0
+            mary.age += 0.0
         except TypeError as err:
             print(f"This is a runtime type error that mypy can't catch:\n{err}")
 
         orm.commit()
+
+    def broken() -> None:
+        """
+        This is on the last page of the Connecting to the Database page,
+        and I really have no idea where options is defined
+        I'd also love to see a quick and general example on checking Database object statistics
+        """
+
+        @db.on_connect(provider="sqlite")
+        def sqlite_case_sensitivity(db, connection):
+            cursor = connection.cursor()
+            cursor.execute("PRAGMA case_sensitive_like = OFF")
+
+        db.bind(**options)
+        db.generate_mapping(create_tables=True)
+
+
+    # "The composite index can include a discriminator attribute used for inheritance"
+    # Example?
 
 
 if __name__ == "__main__":
