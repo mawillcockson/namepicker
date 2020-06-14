@@ -21,6 +21,26 @@ class FileError(Exception):
     """
     pass
 
+
+# mypy does not like circular type definitions
+# class NameTuple(NamedTuple):
+#     value: str
+#     lists: Dict[str, "NameListTuple"]]
+#     name_datas: Dict[str, "NameDataTuple"]
+# 
+# 
+# class NameListTuple(NamedTuple):
+#     title: str
+#     names: Dict[str, NameTuple]
+#     name_datas: Dict[str, "NameDataTuple"]
+# 
+# 
+# class NameDataTuple(NamedTuple):
+#     name: NameTuple
+#     list: NameListTuple
+#     date_added: datetime
+
+
 class NameList:
     def __contains__(self, list_title: str) -> bool:
         if not isinstance(list_title, str):

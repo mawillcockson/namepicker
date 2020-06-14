@@ -1,3 +1,6 @@
+# Databases
+*.sqlitedb
+
 # Ignore imported name lists, except for the example one(s)
 *.txt
 !example.txt
