@@ -11,8 +11,7 @@ from pathlib import Path
 from typing import Dict, NamedTuple, Tuple, Union
 from warnings import warn
 
-# from database_interface import save_lists, save_names, select_lists, select_names
-save_lists = save_name = select_lists = select_names = 0
+from database_interface import save_lists, save_names, select_lists, select_names
 
 
 # Record loglevel name in the logging module (e.g. WARNING, INFO, etc)
@@ -24,7 +23,9 @@ save_lists = save_name = select_lists = select_names = 0
 #     if isinstance(log_attr(name), int) and not isinstance(log_attr(name), bool)
 # }
 def map_logging_level_names_to_values() -> Dict[str, int]:
-    """Record the name and value of log levels from the logging module"""
+    """
+    Record the name and value of log levels from the logging module
+    """
     log_levels: Dict[str, int] = dict()
     for name in dir(logging):
         value = getattr(logging, name)
@@ -61,7 +62,9 @@ log_levels["WARN"] = log_levels["WARNING"]
 #     "WARNING": 30,
 # }
 class LogLevel(IntEnum):
-    """Logging levels defined in logging, and their values"""
+    """
+    Logging levels defined in logging, and their values
+    """
 
     CRITICAL = 50
     DEBUG = 10
@@ -74,8 +77,10 @@ class LogLevel(IntEnum):
 
 
 def check_LogLevel(log_levels: Dict[str, int] = log_levels) -> bool:
-    """Validate that the statically defined LogLevels matches what's currently
-    defined in the logging module"""
+    """
+    Validate that the statically defined LogLevels matches what's currently
+    defined in the logging module
+    """
     for name in log_levels:
         # Does the name match?
         if not name in LogLevel.__members__:
@@ -89,16 +94,20 @@ def check_LogLevel(log_levels: Dict[str, int] = log_levels) -> bool:
 
 
 nl = "\n"
-assert check_LogLevel(), f"""Python's built-in 'logging' module has changed logging levels; LogLevel needs updating:
+assert check_LogLevel(), f"""
+Python's built-in 'logging' module has changed logging levels; LogLevel needs updating:
 LogLevel:
 {nl.join(f'{name} = {value}' for name, value in LogLevel.__members__.items())}
 
-log_levels:
+logging:
 {nl.join(f'{name} = {value}' for name, value in log_levels.items())}
 """
 
 
 def setup_logging(level: Union[str, int, LogLevel] = LogLevel.INFO) -> logging.Logger:
+    """
+    Set's up very, very simple logging
+    """
     if isinstance(level, LogLevel):
         log_level = int(level)
     elif isinstance(level, int) and level in reverse_log_levels:

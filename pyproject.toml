@@ -1,0 +1,17 @@
+[tool.poetry]
+name = "namepicker"
+version = "0.0.1"
+description = "Helps save, organize, and pick names"
+authors = ["Matthew Willcockson <matthew@willcockson.family>"]
+
+[tool.poetry.dependencies]
+python = "^3.7"
+pony = "^0.7.13"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+pytest-cov = "^2.10.0"
+
+[build-system]
+requires = ["poetry>=0.12"]
+build-backend = "poetry.masonry.api"

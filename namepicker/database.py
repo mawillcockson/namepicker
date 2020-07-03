@@ -47,25 +47,6 @@ class NameData(db.Entity):
     date_added = orm.Required(datetime, default=time_now)
 
 
-# mypy does not like circular type definitions
-# class NameTuple(NamedTuple):
-#     value: str
-#     lists: Dict[str, "NameListTuple"]]
-#     name_datas: Dict[str, "NameDataTuple"]
-# 
-# 
-# class NameListTuple(NamedTuple):
-#     title: str
-#     names: Dict[str, NameTuple]
-#     name_datas: Dict[str, "NameDataTuple"]
-# 
-# 
-# class NameDataTuple(NamedTuple):
-#     name: NameTuple
-#     list: NameListTuple
-#     date_added: datetime
-
-
 def initialize_database(filename: SPath = default_database_file) -> None:
     db.bind(provider="sqlite", filename=str(filename), create_db=True)
     db.generate_mapping(check_tables=True, create_tables=True)
