@@ -10,8 +10,9 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Dict, NamedTuple, Tuple, Union
 from warnings import warn
+import atexit
 
-from database_interface import save_lists, save_names, select_lists, select_names
+# from database_interface import save_lists, save_names, select_lists, select_names
 
 
 # Record loglevel name in the logging module (e.g. WARNING, INFO, etc)
@@ -35,17 +36,19 @@ def map_logging_level_names_to_values() -> Dict[str, int]:
     return log_levels
 
 
+# NOTE: Need to make sure the whole logging situation is only configured once,
+# even if this file is imported multiple times in the same program
 log_levels = map_logging_level_names_to_values()
 # Map level name -> level value
 reverse_log_levels = {log_levels[name]: name for name in log_levels}
 # Add alias for WARN
 log_levels["WARN"] = log_levels["WARNING"]
 
-# # NOTE: mypy appears to only be satisfied with a static value here;
+# # NOTe: mypy appears to only be satisfied with a static value here;
 # # it reports an error on any dynamic assignment of Enum content
 # LogLevel = IntEnum("LogLevel", log_levels)
 #
-# NOTE: Cannot set IntEnums dynamically
+# NOTe: Cannot set IntEnums dynamically
 # In general, type instances should be statically defined; I was just looking
 # for a way to specify the logging levels without having to maintain a list and
 # keep it up to date with the logging module
