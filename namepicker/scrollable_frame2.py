@@ -29,27 +29,31 @@ canvas.configure(yscrollcommand=scrollbar.set)
 scrollable_frame = ttk.Frame(canvas)
 canvas.create_window((0, 0), window=scrollable_frame, anchor="nw")
 
-string_vars = [tkinter.StringVar(value=f"Item {i} of 100") for i in range(1, 100+1)]
-entries = [ttk.Entry(scrollable_frame, textvariable=string_var) for string_var in string_vars]
-for i, entry in enumerate(entries):
-    entry.grid(column=0, row=i, sticky="E W")
+rows = 9
+columns = 5
+buttons = [[tkinter.Button() for j in range(columns)] for i in range(rows)]
+for i in range(0, rows):
+    for j in range(0, columns):
+        buttons[i][j] = tkinter.Button(scrollable_frame, text=("%d,%d" % (i+1, j+1)))
+        buttons[i][j].grid(row=i, column=j, sticky='news')
 
+# Update buttons frames idle tasks to let tkinter calculate buttons sizes
 scrollable_frame.update_idletasks()
 
-# 10% of the screen's smallest dimension
-sidelength = (min(root.winfo_screenwidth(), root.winfo_screenheight()) * 10) // 100
-print(sidelength)
+first5columns_width = sum([buttons[0][j].winfo_width() for j in range(0, 5)])
+first5rows_height = sum([buttons[i][0].winfo_height() for i in range(0, 5)])
+canvas_frame.config(width=first5columns_width + scrollbar.winfo_width(),
+                    height=first5rows_height)
 
-canvas_frame.config(width=sidelength, height=sidelength)
 canvas.config(scrollregion=canvas.bbox("all"))
 
-def update_canvas(event) -> None:
-    print(f"{event}\n{dir(event)}")
-    print(canvas.bbox("all"))
-    scrollable_frame.update_idletasks()
-    canvas.config(scrollregion=canvas.bbox("all"))
-
-scrollable_frame.bind("<<Configure>>", update_canvas)
+#def update_canvas(event) -> None:
+#    print(f"{event}\n{dir(event)}")
+#    print(canvas.bbox("all"))
+#    scrollable_frame.update_idletasks()
+#    canvas.config(scrollregion=canvas.bbox("all"))
+#
+#scrollable_frame.bind("<<Configure>>", update_canvas)
 
 root.bind("<KeyPress-Escape>", lambda e: root.destroy())
 root.mainloop()
