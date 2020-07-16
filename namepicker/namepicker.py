@@ -76,7 +76,7 @@ class LogLevel(IntEnum):
     INFO = 20
     NOTSET = 0
     WARN = 30
-    WARNING  = 30
+    WARNING = 30
 
 
 def check_LogLevel(log_levels: Dict[str, int] = log_levels) -> bool:
@@ -169,9 +169,6 @@ def arguments() -> Namespace:
 def main() -> None:
     args = arguments()
     setup_logging(level=args.log)
-    for path in args.list:
-        with path.open() as f:
-            add_list(title=path.name, names=(name for name in f))
 
 
 if __name__ == "__main__":

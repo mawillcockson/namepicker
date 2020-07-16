@@ -154,7 +154,6 @@ def main() -> None:
         db.bind(**options)
         db.generate_mapping(create_tables=True)
 
-
     # "The composite index can include a discriminator attribute used for inheritance"
     # Example?
 

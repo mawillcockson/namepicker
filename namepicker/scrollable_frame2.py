@@ -34,26 +34,29 @@ columns = 5
 buttons = [[tkinter.Button() for j in range(columns)] for i in range(rows)]
 for i in range(0, rows):
     for j in range(0, columns):
-        buttons[i][j] = tkinter.Button(scrollable_frame, text=("%d,%d" % (i+1, j+1)))
-        buttons[i][j].grid(row=i, column=j, sticky='news')
+        buttons[i][j] = tkinter.Button(
+            scrollable_frame, text=("%d,%d" % (i + 1, j + 1))
+        )
+        buttons[i][j].grid(row=i, column=j, sticky="news")
 
 # Update buttons frames idle tasks to let tkinter calculate buttons sizes
 scrollable_frame.update_idletasks()
 
 first5columns_width = sum([buttons[0][j].winfo_width() for j in range(0, 5)])
 first5rows_height = sum([buttons[i][0].winfo_height() for i in range(0, 5)])
-canvas_frame.config(width=first5columns_width + scrollbar.winfo_width(),
-                    height=first5rows_height)
+canvas_frame.config(
+    width=first5columns_width + scrollbar.winfo_width(), height=first5rows_height
+)
 
 canvas.config(scrollregion=canvas.bbox("all"))
 
-#def update_canvas(event) -> None:
+# def update_canvas(event) -> None:
 #    print(f"{event}\n{dir(event)}")
 #    print(canvas.bbox("all"))
 #    scrollable_frame.update_idletasks()
 #    canvas.config(scrollregion=canvas.bbox("all"))
 #
-#scrollable_frame.bind("<<Configure>>", update_canvas)
+# scrollable_frame.bind("<<Configure>>", update_canvas)
 
 root.bind("<KeyPress-Escape>", lambda e: root.destroy())
 root.mainloop()

@@ -36,8 +36,10 @@ scrollable_frame.grid(column=0, row=0, sticky="N S E W")
 scrollable_frame.columnconfigure(0, weight=1)
 scrollable_frame.rowconfigure(0, weight=1)
 
-string_vars = [tkinter.StringVar(value=f"Item {i} of 100") for i in range(1, 100+1)]
-entries = [ttk.Entry(scrollable_frame, textvariable=string_var) for string_var in string_vars]
+string_vars = [tkinter.StringVar(value=f"Item {i} of 100") for i in range(1, 100 + 1)]
+entries = [
+    ttk.Entry(scrollable_frame, textvariable=string_var) for string_var in string_vars
+]
 for i, entry in enumerate(entries):
     entry.grid(column=0, row=i, sticky="E W")
 
@@ -49,9 +51,11 @@ sidelength = (min(root.winfo_screenwidth(), root.winfo_screenheight()) * 30) // 
 canvas_frame.config(width=sidelength, height=sidelength)
 canvas.config(scrollregion=canvas.bbox("all"))
 
+
 def update_canvas(event) -> None:
     scrollable_frame.update_idletasks()
     canvas.config(scrollregion=canvas.bbox("all"))
+
 
 scrollable_frame.bind("<<Configure>>", update_canvas)
 
