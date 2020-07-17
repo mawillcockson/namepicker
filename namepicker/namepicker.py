@@ -2,6 +2,7 @@
 Main file to run the program
 """
 
+import atexit
 import logging
 import sys
 from argparse import ArgumentParser, ArgumentTypeError, Namespace
@@ -10,7 +11,6 @@ from enum import IntEnum
 from pathlib import Path
 from typing import Dict, NamedTuple, Tuple, Union
 from warnings import warn
-import atexit
 
 # from database_interface import save_lists, save_names, select_lists, select_names
 

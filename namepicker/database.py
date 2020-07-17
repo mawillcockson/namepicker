@@ -58,21 +58,48 @@ def initialize_database(
     db = orm.Database()
 
     class Item(db.Entity):
-        # id = PrimaryKey(int, auto=True)
+        """
+        Represents a single item
+
+        The same item can be shared amongst multiple ItemLists
+
+        There can only ever be one item with a particular name
+
+        Each item is associated with metadata that keeps track of which ItemLists
+        it's been added to, and when
+
+        """
+
+        # Automatically added by pony, listed explicitly
+        id = orm.PrimaryKey(int, auto=True)
         text = orm.Required(str, unique=True)
         lists = orm.Set("ItemList")
-        item_datas = orm.Set("ItemData")
+        item_metadatas = orm.Set("ItemMetadata")
 
     class ItemList(db.Entity):
-        # id = PrimaryKey(int, auto=True)
+        """
+        Represents a group of items, addressable by a name
+        Also keeps track of the metadata for each item
+        """
+
+        # Automatically added by pony, listed explicitly
+        id = orm.PrimaryKey(int, auto=True)
         title = orm.Required(str, unique=True)
         items = orm.Set(Item)
-        items_datas = orm.Set("ItemData")
+        items_metadatas = orm.Set("ItemMetadata")
 
-    class ItemData(db.Entity):
-        # id = PrimaryKey(int, auto=True)
+    class ItemMetadata(db.Entity):
+        """
+        Represents item metadata
+
+        links to the item and the list that this particular metadata unit is
+        associated with
+        """
+
+        # Automatically added by pony, listed explicitly
+        id = orm.PrimaryKey(int, auto=True)
         item = orm.Required(Item)
-        list = orm.Required(ItemList)
+        item_list = orm.Required(ItemList)
         date_added = orm.Required(datetime, default=time_now)
 
     db.bind(provider="sqlite", filename=str(filename), create_db=create)
@@ -86,16 +113,9 @@ def enable_debugging(enable: bool = True, enable_sql: bool = True) -> None:
     enables Pony's debugging as well as other logging in this module
     """
     if enable:
-        pass
+        raise NotImplementedError(
+            "Need to somehow use python logging module here\nsee https://docs.ponyorm.org/api_reference.html#set_sql_debug"
+        )
 
     if enable_sql:
         orm.set_sql_debug(debug=True, show_values=True)
-
-
-# @orm.db_session()
-# def select_list(list_title: str) -> Iterator[NameTuple]:
-#    if not isinstance(list_title, str):
-#        raise TypeError(f"list_title must be a str; got {type(list_title)}")
-#    query = NameList.select(name for name in Name if list_title in name.lists)
-#    for item in query:
-#        yield NameTuple(value=item.value, lists=[l.title for l in item.lists])

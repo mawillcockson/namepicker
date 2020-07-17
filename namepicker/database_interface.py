@@ -1,8 +1,9 @@
 """
 Uses database.py to provide a (mostly) typed interface to the database
 """
-from typing import Iterable, Iterator, Union, Optional
 from pathlib import Path
+from typing import Iterable, Iterator, Optional, Union
+
 from database import ListNotFoundError, select_list
 
 # def save_names()

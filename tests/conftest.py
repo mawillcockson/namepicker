@@ -12,6 +12,6 @@ def namepicker_database() -> Database:
     Builds an in-memeory database
     """
 
-    from namepicker.database import initialize_database, in_memory_db_filename
+    from namepicker.database import in_memory_db_filename, initialize_database
 
     return initialize_database(in_memory_db_filename)

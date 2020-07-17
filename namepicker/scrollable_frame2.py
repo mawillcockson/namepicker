@@ -1,7 +1,7 @@
 import tkinter
-from tkinter import ttk
-from typing import List, Dict
 from dataclasses import dataclass
+from tkinter import ttk
+from typing import Dict, List
 
 root = tkinter.Tk()
 root.grid_rowconfigure(0, weight=1)
