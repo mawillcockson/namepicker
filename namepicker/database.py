@@ -108,6 +108,14 @@ def initialize_database(
     return db
 
 
+if not hasattr(locals(), "current_database"):
+    current_database = (
+        initialize_database()
+        if Path(default_database_file).is_file()
+        else initialize_database(create=True)
+    )
+
+
 def enable_debugging(enable: bool = True, enable_sql: bool = True) -> None:
     """
     enables Pony's debugging as well as other logging in this module
