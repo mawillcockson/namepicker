@@ -7,6 +7,8 @@ authors = ["Matthew Willcockson <matthew@willcockson.family>"]
 [tool.poetry.dependencies]
 python = "^3.7"
 pony = "^0.7.13"
+pydantic = "^1.6.1"
+fastapi = "^0.59.0"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
